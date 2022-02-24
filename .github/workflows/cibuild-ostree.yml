@@ -4,10 +4,11 @@ on:
     branches:
       - main
     paths:
-      - ostree/*
+      - 'ostree/**'
+
   pull_request:
     paths:
-      - ostree/*
+      - 'ostree/**'
 
   # Allow for manually running
   workflow_dispatch:
