@@ -56,7 +56,7 @@ jobs:
         run: |
           CONTAINER_TAG=$(echo "$RAW_CONTAINER_TAG" | sed 's/[^a-zA-Z0-9]\+/-/')
 
-          docker buildx build \
+          cd ostree && docker buildx build \
             --platform "$BUILD_PLATFORMS" \
             --cache-from type=gha \
             --cache-to type=gha,mode=max \
