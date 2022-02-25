@@ -4,18 +4,13 @@ on:
     branches:
       - main
     paths:
-      - ostree/*
+      - 'ostree/**'
+
   pull_request:
     paths:
-      - ostree/*
+      - 'ostree/**'
 
-  # Allow for manually running
   workflow_dispatch:
-#    inputs:
-#      container_tag:
-#        description: Tag for container
-#        default: "latest"
-#        required: true
 
 jobs:
   cibuild:
@@ -50,17 +45,16 @@ jobs:
       - name: Expose GitHub Runtime
         uses: crazy-max/ghaction-github-runtime@v1
 
-      - name: Build container
+      - name: make ostree
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          CONTAINER_TAG=$(echo "$RAW_CONTAINER_TAG" | sed 's/[^a-zA-Z0-9]\+/-/')
+          BUILDX_ARGS: --platform ${{ env.BUILD_PLATFORMS }} --cache-from type=gha --cache-to type=gha,mode=max
+        run: make ostree
 
-          cd ostree && docker buildx build \
-            --platform "$BUILD_PLATFORMS" \
-            --cache-from type=gha \
-            --cache-to type=gha,mode=max \
-            --pull  .
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ostree-packages
+          path: output/ostree/*
 
       - uses: act10ns/slack@v1.5.1
         with:
@@ -70,3 +64,26 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
         if: always()
+
+
+  packagecloud:
+    runs-on: ubuntu-20.04
+    if: github.event_name == 'push'
+
+    needs:
+      - cibuild
+
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          path: ./artifacts
+
+      - run: ls -laR artifacts
+
+      - uses: TykTechnologies/packagecloud-action@main
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+        with:
+          repo: caketop/bootleg-packages
+          dir: artifacts/ostree
+          debvers: focal
