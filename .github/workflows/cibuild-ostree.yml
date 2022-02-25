@@ -74,16 +74,28 @@ jobs:
       - cibuild
 
     steps:
+      - name: Install Packagecloud CLI
+        run: gem install package_cloud
+
       - uses: actions/download-artifact@v2
         with:
           path: ./artifacts
 
       - run: ls -laR artifacts
 
-      - uses: TykTechnologies/packagecloud-action@main
+      - name: Upload packages
+        run: |
+          for package in artifacts/ostree/*.deb artifacts/ostree/*.dsc; do
+            package_cloud push caketop/bootleg-packages/ubuntu/focal "$package"
+          done
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - uses: act10ns/slack@v1.5.1
         with:
-          repo: caketop/bootleg-packages
-          dir: artifacts/ostree
-          debvers: focal
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          channel: "#builds"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
+        if: always()
