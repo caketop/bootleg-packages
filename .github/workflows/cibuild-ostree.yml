@@ -10,13 +10,7 @@ on:
     paths:
       - 'ostree/**'
 
-  # Allow for manually running
   workflow_dispatch:
-#    inputs:
-#      container_tag:
-#        description: Tag for container
-#        default: "latest"
-#        required: true
 
 jobs:
   cibuild:
@@ -56,6 +50,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BUILDX_ARGS: --platform ${{ env.BUILD_PLATFORMS }} --cache-from type=gha --cache-to type=gha,mode=max
         run: make ostree
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ostree-packages
+          path: output/ostree/*
 
       - uses: act10ns/slack@v1.5.1
         with:
