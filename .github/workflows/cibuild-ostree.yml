@@ -15,8 +15,8 @@ on:
       publish:
         description: 'Publish to Packagecloud?'
         required: false
-        default: false
         type: boolean
+        default: "false"
 
 jobs:
   cibuild:
@@ -74,7 +74,7 @@ jobs:
 
   packagecloud:
     runs-on: ubuntu-20.04
-    if: (github.event_name == 'push') || (github.event.inputs.publish == true)
+    if: (github.event_name == 'push') || (github.event.inputs.publish == "true")
 
     needs:
       - cibuild
