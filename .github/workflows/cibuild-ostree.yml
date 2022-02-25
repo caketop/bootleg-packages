@@ -11,6 +11,12 @@ on:
       - 'ostree/**'
 
   workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish to Packagecloud?'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   cibuild:
@@ -68,7 +74,7 @@ jobs:
 
   packagecloud:
     runs-on: ubuntu-20.04
-    if: github.event_name == 'push'
+    if: (github.event_name == 'push') || (github.event.inputs.publish == true)
 
     needs:
       - cibuild
