@@ -80,7 +80,7 @@ jobs:
 
     steps:
       - name: Install Packagecloud CLI
-        run: gem install package_cloud
+        run: sudo gem install package_cloud
 
       - uses: actions/download-artifact@v2
         with:
@@ -90,7 +90,7 @@ jobs:
 
       - name: Upload packages
         run: |
-          for package in artifacts/ostree/*.deb artifacts/ostree/*.dsc; do
+          for package in artifacts/ostree/*.deb artifacts/ostree-packages/*.dsc; do
             package_cloud push caketop/bootleg-packages/ubuntu/focal "$package"
           done
         env:
