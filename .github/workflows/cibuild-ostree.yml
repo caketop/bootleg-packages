@@ -80,7 +80,7 @@ jobs:
 
       - run: ls -laR artifacts
 
-      - uses: TykTechnologies/packagecloud-action
+      - uses: TykTechnologies/packagecloud-action@main
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
         with:
