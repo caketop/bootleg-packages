@@ -64,3 +64,26 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
         if: always()
+
+
+  packagecloud:
+    runs-on: ubuntu-20.04
+    if: github.event_name == 'push'
+
+    needs:
+      - cibuild
+
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          path: ./artifacts
+
+      - run: ls -laR artifacts
+
+      - uses: TykTechnologies/packagecloud-action
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+        with:
+          repo: caketop/bootleg-packages
+          dir: artifacts/ostree
+          debvers: focal
