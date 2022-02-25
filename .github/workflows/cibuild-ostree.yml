@@ -91,7 +91,7 @@ jobs:
       - name: Upload packages
         run: |
 
-          for package in artifacts/ostree/*/*.deb artifacts/ostree-packages/linux_amd64/*.dsc; do
+          for package in artifacts/ostree-packages/*/*.deb artifacts/ostree-packages/linux_amd64/*.dsc; do
             package_cloud push caketop/bootleg-packages/ubuntu/focal "$package"
           done
         env:
