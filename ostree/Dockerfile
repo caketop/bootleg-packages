@@ -27,7 +27,7 @@ RUN dget -u http://snapshot.debian.org/archive/debian/20220224T145813Z/pool/main
 
 COPY ostree-caketop.patch /usr/src/ostree-caketop.patch
 
-RUN rm *.debian.tar.* *.dsc
+RUN rm *.debian.tar.* *.dsc *.deb
 
 WORKDIR /usr/src/ostree-2022.1
 RUN patch -p1 < ../ostree-caketop.patch && rm ../ostree-caketop.patch

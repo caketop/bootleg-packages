@@ -26,7 +26,7 @@ RUN dget -u http://snapshot.debian.org/archive/debian/20220224T210146Z/pool/main
       msmtp-1.8.16/debian/control
 
 COPY msmtp-autoreconf.patch /usr/src/msmtp-autoreconf.patch
-RUN rm *.debian.tar.* *.dsc
+RUN rm *.debian.tar.* *.dsc *.deb
 
 WORKDIR /usr/src/msmtp-1.8.16
 RUN patch -p1 < ../msmtp-autoreconf.patch && rm ../msmtp-autoreconf.patch
