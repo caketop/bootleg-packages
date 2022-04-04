@@ -1,0 +1,27 @@
+Source: optpython@PYTHON_RELEASE@-guestfs
+Section: unknown
+Priority: optional
+Maintainer: Caketop <packages@caketop.app>
+Build-Depends: debhelper (>=11~), gcc-11, optpython@PYTHON_RELEASE@
+Standards-Version: 4.1.4
+
+Package: optpython@PYTHON_RELEASE@-guestfs
+Architecture: any
+Multi-Arch: foreign
+Depends: optpython@PYTHON_RELEASE@, ${misc:Depends}, ${shlibs:Depends}
+Description: libguestfs bindings for optpython@PYTHON_RELEASE@
+Recommends: libguestfs@LIBGUESTFS_RELEASE@-fixed-appliance
+
+Package: guestfish@LIBGUESTFS_RELEASE@
+Architecture: any
+Multi-Arch: foreign
+Conflicts: libguestfs-tools, guestfish
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: guestfish from libguestfs @LIBGUESTFS_RELEASE@
+Recommends: libguestfs@LIBGUESTFS_RELEASE@-fixed-appliance
+
+Package: libguestfs@LIBGUESTFS_RELEASE@-fixed-appliance
+Architecture: any
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Fixed appliance built for @LIBGUESTFS_RELEASE@

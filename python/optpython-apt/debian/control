@@ -1,0 +1,12 @@
+Source: optpython@PYTHON_RELEASE@-apt
+Section: unknown
+Priority: optional
+Maintainer: Caketop <packages@caketop.app>
+Build-Depends: debhelper (>=11~), gcc-11, optpython@PYTHON_RELEASE@
+Standards-Version: 4.1.4
+
+Package: optpython@PYTHON_RELEASE@-apt
+Architecture: any
+Multi-Arch: foreign
+Depends: optpython@PYTHON_RELEASE@, ${misc:Depends}, ${shlibs:Depends}
+Description: python-apt for optpython@PYTHON_RELEASE@

@@ -1,0 +1,14 @@
+Source: optpython@PYTHON_RELEASE@
+Section: unknown
+Priority: optional
+Maintainer: Caketop <packages@caketop.app>
+Build-Depends: debhelper (>=11~)
+Standards-Version: 4.1.4
+
+Package: optpython@PYTHON_RELEASE@
+Architecture: any
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Optimized Python @PYTHON_RELEASE@
+  Built with GCC 11, PGO, LTO, and jemalloc and installed
+  in /opt/python-@PYTHON_RELEASE@ for your enjoyment.

@@ -1,0 +1,50 @@
+#!/usr/bin/make -f
+# You must remove unused comment lines for the released package.
+#export DH_VERBOSE = 1
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+REQUIRED_LIBS = $$(pkg-config --static --libs libpcre2-8) $$(pkg-config --static --libs jansson) $$(pkg-config --static --libs libxml-2.0) $$(pkg-config --static --libs fuse)
+
+override_dh_auto_configure:
+	env CC=gcc-11 \
+			PKG_CONFIG_PATH="/opt/python-@PYTHON_RELEASE@/lib/pkgconfig" \
+			CFLAGS="@MY_CFLAGS@ -g" \
+			LDFLAGS="@MY_LDFLAGS@" \
+			CPPFLAGS="@MY_CPPFLAGS@" \
+			PYTHON="/opt/python-@PYTHON_RELEASE@/bin/python3" \
+			LIBS="$(REQUIRED_LIBS)" \
+			./configure \
+				--prefix=/usr \
+				--disable-shared --enable-static --with-pic \
+				--enable-fuse \
+				--enable-appliance \
+				--without-java --without-libvirt \
+				--enable-ocaml --disable-perl --enable-python --disable-ruby --disable-haskell \
+				--disable-php --disable-erlang --disable-lua --disable-golang --disable-gobject
+
+override_dh_auto_build:
+	for common in protocol qemuopts structs utils edit options progress errnostring mlstdutils mlutils mlpcre ; do (cd common/"$$common" && make) ; done
+	(cd gnulib/lib && make)
+	(cd lib && make)
+	(cd fish && make)
+	(cd bundled/ocaml-augeas && make)
+	(cd daemon && make)
+	(cd appliance && make)
+	(cd python && make sdist)
+	(cd python/dist && tar -xzvf guestfs-*.tar.gz)
+	(cd python/dist/guestfs-* && \
+			env CFLAGS="-g -I../../../include -L../../../lib/.libs -pthread -Wl,--no-as-needed $(REQUIRED_LIBS) -Wl,-as-needed" \
+				python3 -m pip wheel .)
+
+override_dh_auto_install:
+	install -d -m 755 debian/tmp/usr/bin
+	install -m 755 fish/guestfish debian/tmp/usr/bin
+	python3 -m pip install --root debian/tmp python/dist/guestfs-*/*.whl
+	./run ./appliance/libguestfs-make-fixed-appliance --xz
+	install -d -m 755 debian/tmp/usr/lib/libguestfs-fixed-appliance
+	mv appliance-*.tar.xz debian/tmp/usr/lib/libguestfs-fixed-appliance
+
+%:
+	dh $@
