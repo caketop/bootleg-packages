@@ -1,0 +1,37 @@
+name: Publish packages
+on:
+  workflow_call:
+    secrets:
+      BUILD_WEBHOOK_URL:
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          path: ./artifacts
+
+      - name: Install Packagecloud CLI
+        run: sudo gem install package_cloud
+
+      - run: ls -laR artifacts
+
+      - name: Upload packages
+        run: |
+          find artifacts -name '*.deb' -o -name '*.ddeb' -o -name '*.dsc' -print0 | while IFS= read -r -d '' package ; do
+            echo "PACKAGE: $package"
+            package_cloud push caketop/bootleg-packages/ubuntu/focal "$package" || true
+          done
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - uses: act10ns/slack@v1.5.1
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          channel: "#builds"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
+        if: always()
