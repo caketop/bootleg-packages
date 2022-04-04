@@ -32,3 +32,5 @@ jobs:
     if: (github.event_name == 'push') || (github.event.inputs.publish == 'true')
     uses: ./.github/workflows/publish-packages.yml
     needs: build
+    secrets:
+      BUILD_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
