@@ -18,14 +18,14 @@ jobs:
       - name: Install Packagecloud CLI
         run: sudo gem install package_cloud
 
-      - run: find artifacts -name '*.deb' -o -name '*.ddeb' -o -name '*.dsc'
+      - run: find artifacts \( -name '*.deb' -o -name '*.ddeb' -o -name '*.dsc' \) -print
 
       - name: Upload packages
         run: |
           while IFS= read -r -d '' package ; do
             echo "PACKAGE: $package"
             package_cloud push caketop/bootleg-packages/ubuntu/focal "$package" || true
-          done < <(find artifacts -name '*.deb' -o -name '*.ddeb' -o -name '*.dsc' -print0)
+          done < <(find "$1" \( -name '*.deb' -o -name '*.ddeb' -o -name '*.dsc' \) -print0)
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
 
