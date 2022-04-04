@@ -70,7 +70,7 @@ jobs:
             CONTAINER_TAG=$(echo "$CONTAINER_TAG" | sed 's/[^a-zA-Z0-9]\+/-/')
           fi
 
-          docker buildx build $${{ inputs.buildx_args }} \
+          docker buildx build ${{ inputs.buildx_args }} \
             --platform ${{ inputs.platforms }} \
             --cache-from type=gha \
             -t "$CONTAINER_NAME:$CONTAINER_TAG" --push \
