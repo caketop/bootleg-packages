@@ -60,19 +60,21 @@ jobs:
         env:
           INPUT_CONTAINER_TAG: ${{ inputs.container_tag || github.event.pull_request.head.ref }}
         run: |
+          set -x
+
           CONTAINER_TAG=${INPUT_CONTAINER_TAG:-${GITHUB_REF#refs/heads/}}
+
           if [ "$CONTAINER_TAG" == "main" ]; then
             CONTAINER_TAG=latest
           else
             CONTAINER_TAG=$(echo "$CONTAINER_TAG" | sed 's/[^a-zA-Z0-9]\+/-/')
           fi
 
-          set -x
-
           docker buildx build $${{ inputs.buildx_args }} \
             --platform ${{ inputs.platforms }} \
             --cache-from type=gha \
-            -t "$CONTAINER_NAME:$CONTAINER_TAG" --push
+            -t "$CONTAINER_NAME:$CONTAINER_TAG" --push \
+            ${{ inputs.path }}
 
       - uses: act10ns/slack@v1.5.1
         with:
