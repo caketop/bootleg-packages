@@ -1,4 +1,8 @@
-FROM python_base AS libguestfs_build
+ARG PYTHON_RELEASE=3.10
+ARG LIBGUESTFS_RELEASE=1.48
+ARG LIBGUESTFS_VERSION=1.48.0
+
+FROM caketop/python-build:latest AS python_apt_build
 
 ARG PYTHON_RELEASE LIBGUESTFS_RELEASE LIBGUESTFS_VERSION
 
@@ -47,3 +51,10 @@ RUN set -x && \
           --distribution focal "Built from source"
 
 RUN DEB_BUILD_OPTIONS="nocheck nodoc" dpkg-buildpackage --build=binary -us -ui -uc
+
+########################################################################
+
+FROM scratch AS packages
+
+COPY --from=python_apt_build /home/builder/libguestfs-build/*.deb /
+COPY --from=python_apt_build /home/builder/libguestfs-build/*.ddeb /

@@ -2,10 +2,6 @@ ARG PYTHON_RELEASE=3.10
 ARG PYTHON_PATCH=4
 ARG PYTHON_VERSION=${PYTHON_RELEASE}.${PYTHON_PATCH}
 ARG JEMALLOC_VERSION=5.2.1
-# ARG PYGOBJECT_VERSION=3.42.0
-# ARG PYTHON_APT_VERSION=2.3.0
-# ARG LIBGUESTFS_RELEASE=1.48
-# ARG LIBGUESTFS_VERSION=1.48.0
 
 FROM ubuntu:20.04 AS builder_base
 
@@ -135,7 +131,7 @@ ENV PATH=/opt/python-${PYTHON_RELEASE}/bin:/usr/local/sbin:/usr/local/bin:/usr/s
 
 ########################################################################
 
-FROM scratch AS artifacts
+FROM scratch AS packages
 
-COPY --from=python_build /home/builder/optpython-build/optpython*.deb /
-COPY --from=python_build /home/builder/optpython-build/optpython*.ddeb /
+COPY --from=python_build /home/builder/optpython-build/*.deb /
+COPY --from=python_build /home/builder/optpython-build/*.ddeb /

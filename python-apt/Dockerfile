@@ -1,7 +1,7 @@
 ARG PYTHON_RELEASE=3.10
 ARG PYTHON_APT_VERSION=2.3.0
 
-FROM python_base AS python_apt_build
+FROM caketop/python-build:latest AS python_apt_build
 
 ARG PYTHON_RELEASE PYTHON_APT_VERSION
 
@@ -31,3 +31,10 @@ RUN set -x && \
           --distribution focal "Converted from wheel"
 
 RUN dpkg-buildpackage --build=binary -us -ui -uc
+
+########################################################################
+
+FROM scratch AS packages
+
+COPY --from=python_apt_build /home/builder/python-apt-build/*.deb /
+COPY --from=python_apt_build /home/builder/python-apt-build/*.ddeb /
