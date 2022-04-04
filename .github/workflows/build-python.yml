@@ -17,6 +17,15 @@ on:
         required: false
         type: boolean
         default: false
+      container:
+        description: 'Publish container?'
+        required: false
+        type: boolean
+        default: false
+      container_tag:
+        description: 'Tag for container'
+        required: false
+        type: string
 
 jobs:
   build:
@@ -36,3 +45,17 @@ jobs:
     secrets:
       BUILD_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+  container:
+    if: (github.event_name == 'push') || (github.event.inputs.container == 'true')
+    needs: build
+    uses: ./.github/workflows/publish-container.yml
+    with:
+      path: python
+      container_name: caketop/python-build
+      container_tag: ${{ github.event.inputs.container_tag }}
+      buildx_args: --target python_dev
+    secrets:
+      BUILD_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
