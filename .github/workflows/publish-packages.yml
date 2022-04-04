@@ -22,8 +22,15 @@ jobs:
 
       - name: Upload packages
         run: |
+          set -x
+
           while IFS= read -r -d '' package ; do
-            echo "### PACKAGE: $package"
+            if [[ $package == *.ddeb ]]; then
+              deb=$(basename $package .ddeb).deb
+              mv "$package" "$deb"
+              package=$deb
+            fi
+
             package_cloud push caketop/bootleg-packages/ubuntu/focal "$package" || true
           done < <(find artifacts \( -name '*.deb' -o -name '*.ddeb' -o -name '*.dsc' \) -print0)
         env:
