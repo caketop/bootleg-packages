@@ -1,0 +1,62 @@
+name: Build packages
+on:
+  workflow_call:
+    inputs:
+      make:
+        required: true
+        type: string
+      platforms:
+        required: true
+        type: string
+    secrets:
+      BUILD_WEBHOOK_URL:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: act10ns/slack@v1.5.1
+        with:
+          status: starting
+          channel: "#builds"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1.6.0
+
+      - name: Login to container registry
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
+
+      - uses: actions/checkout@v2
+
+      # Needed for buildx gha cache to work
+      - name: Expose GitHub runtime for caching
+        uses: crazy-max/ghaction-github-runtime@v1
+
+      - name: make
+        env:
+          BUILDX_ARGS: --platform ${{ inputs.platforms }} --cache-from type=gha --cache-to type=gha,mode=max
+        run: make ${{ inputs.make }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: packages
+          path: output/${{ inputs.make }}/*
+
+      - uses: act10ns/slack@v1.5.1
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          channel: "#builds"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
+        if: always()

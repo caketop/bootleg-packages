@@ -1,0 +1,34 @@
+name: Build python
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'python/**'
+
+  pull_request:
+    paths:
+      - 'python/**'
+
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish to Packagecloud?'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-packages.yml
+    with:
+      make: python
+      platforms: linux/amd64
+    secrets:
+      BUILD_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
+
+
+  publish:
+    if: (github.event_name == 'push') || (github.event.inputs.publish == 'true')
+    uses: ./.github/workflows/publish-packages.yml
+    needs: build
