@@ -25,7 +25,7 @@ jobs:
           while IFS= read -r -d '' package ; do
             echo "### PACKAGE: $package"
             package_cloud push caketop/bootleg-packages/ubuntu/focal "$package" || true
-          done < <(find "$1" \( -name '*.deb' -o -name '*.ddeb' -o -name '*.dsc' \) -print0)
+          done < <(find artifacts \( -name '*.deb' -o -name '*.ddeb' -o -name '*.dsc' \) -print0)
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
 
