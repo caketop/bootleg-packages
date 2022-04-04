@@ -234,6 +234,7 @@ RUN set -x && \
       -e "s#@MY_LDFLAGS@#${MY_LDFLAGS}#"  \
       -e "s#@MY_CPPFLAGS@#${MY_CPPFLAGS}#"  \
       -i debian/rules && \
+    cp COPYING.LIB debian/copyright && \
     patch -p0 < ../libguestfs-appliance-packagelist.diff && \
     echo "/usr/bin/guestfish" > debian/guestfish${LIBGUESTFS_RELEASE}.install && \
     echo "/opt/python-${PYTHON_RELEASE}/lib/*" > debian/optpython${PYTHON_RELEASE}-guestfs.install && \
