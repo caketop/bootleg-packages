@@ -8,8 +8,15 @@ on:
       platforms:
         required: true
         type: string
+      buildx_args:
+        required: false
+        type: string
     secrets:
       BUILD_WEBHOOK_URL:
+        required: true
+      REGISTRY_USERNAME:
+        required: true
+      REGISTRY_TOKEN:
         required: true
 
 jobs:
@@ -44,7 +51,7 @@ jobs:
 
       - name: make
         env:
-          BUILDX_ARGS: --platform ${{ inputs.platforms }} --cache-from type=gha --cache-to type=gha,mode=max
+          BUILDX_ARGS: ${{ inputs.buildx_args }} --platform ${{ inputs.platforms }} --cache-from type=gha --cache-to type=gha,mode=max
         run: make ${{ inputs.make }}
 
       - uses: actions/upload-artifact@v2

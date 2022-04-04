@@ -26,7 +26,8 @@ jobs:
       platforms: linux/amd64
     secrets:
       BUILD_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
-
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
 
   publish:
     if: (github.event_name == 'push') || (github.event.inputs.publish == 'true')
