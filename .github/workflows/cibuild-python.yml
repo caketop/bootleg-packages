@@ -1,0 +1,106 @@
+name: Build python
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'python/**'
+
+  pull_request:
+    paths:
+      - 'python/**'
+
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish to Packagecloud?'
+        required: false
+        type: boolean
+        default: "false"
+
+jobs:
+  cibuild:
+    runs-on: ubuntu-20.04
+    env:
+      BUILD_PLATFORMS: linux/amd64
+
+    steps:
+      - uses: act10ns/slack@v1.5.1
+        with:
+          status: starting
+          channel: "#builds"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1.6.0
+
+      - name: Login to container registry
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
+
+      - uses: actions/checkout@v2
+
+      # Needed for buildx gha cache to work
+      - name: Expose GitHub Runtime
+        uses: crazy-max/ghaction-github-runtime@v1
+
+      - name: make python
+        env:
+          BUILDX_ARGS: --platform ${{ env.BUILD_PLATFORMS }} --cache-from type=gha --cache-to type=gha,mode=max
+        run: make python
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: python-packages
+          path: output/python/*
+
+      - uses: act10ns/slack@v1.5.1
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          channel: "#builds"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
+        if: always()
+
+
+  packagecloud:
+    runs-on: ubuntu-20.04
+    if: (github.event_name == 'push') || (github.event.inputs.publish == 'true')
+
+    needs:
+      - cibuild
+
+    steps:
+      - name: Install Packagecloud CLI
+        run: sudo gem install package_cloud
+
+      - uses: actions/download-artifact@v2
+        with:
+          path: ./artifacts
+
+      - run: ls -laR artifacts
+
+      - name: Upload packages
+        run: |
+          for package in artifacts/python-packages/*/*.deb artifacts/python-packages/*/*.ddeb ; do
+            package_cloud push caketop/bootleg-packages/ubuntu/focal "$package"
+          done
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - uses: act10ns/slack@v1.5.1
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          channel: "#builds"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
+        if: always()

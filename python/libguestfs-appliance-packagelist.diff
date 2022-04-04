@@ -1,0 +1,25 @@
+diff -dpru appliance.orig/packagelist.in appliance/packagelist.in
+--- appliance.orig/packagelist.in	2022-04-04 16:35:16.456435575 +0000
++++ appliance/packagelist.in	2022-04-04 17:28:42.097883166 +0000
+@@ -85,7 +85,7 @@ dnl iproute has been renamed to iproute2
+   ufsutils
+   vim-tiny
+   xz-utils
+-  zfs-fuse
++  zfsutils-linux
+   uuid-runtime
+ )
+ 
+@@ -282,10 +282,10 @@ dnl (virt-dib) tools optionally used for
+ debootstrap
+ 
+ dnl exFAT is not usually available in free software repos
+-exfat-fuse
++dnl exfat-fuse
+ exfat-utils
+ exfatprogs
+-fuse-exfat
++dnl fuse-exfat
+ 
+ dnl Define this by doing: ./configure --with-extra-packages="..."
+ EXTRA_PACKAGES
