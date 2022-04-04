@@ -73,7 +73,7 @@ jobs:
           docker buildx build ${{ inputs.buildx_args }} \
             --platform ${{ inputs.platforms }} \
             --cache-from type=gha \
-            -t "$CONTAINER_NAME:$CONTAINER_TAG" --push \
+            -t "${{ inputs.container_name }}:$CONTAINER_TAG" --push \
             ${{ inputs.path }}
 
       - uses: act10ns/slack@v1.5.1
