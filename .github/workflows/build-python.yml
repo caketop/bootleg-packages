@@ -35,3 +35,4 @@ jobs:
     needs: build
     secrets:
       BUILD_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
+      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
