@@ -37,5 +37,6 @@ RUN DEB_BUILD_OPTIONS="nocheck nodoc" dpkg-buildpackage
 WORKDIR /usr/src
 RUN rm -rf msmtp-1.8.16
 
-FROM scratch AS artifacts
+FROM scratch AS packages
+
 COPY --from=build /usr/src/* /
