@@ -1,6 +1,6 @@
 # msmtp
 
-This is a backport of a newer version of [msmtp][https://marlam.de/msmtp/] to Ubuntu 20.04.
+This is a backport of a newer version of [msmtp](https://marlam.de/msmtp/) to Ubuntu 20.04.
 
 The sources are taken from a Debian snapshot of sid.
 
