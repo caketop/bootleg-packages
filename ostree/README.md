@@ -1,6 +1,6 @@
 # ostree
 
-This is a backport of a newer version of [ostree][https://ostreedev.github.io/ostree/] to Ubuntu 20.04.
+This is a backport of a newer version of [ostree](https://ostreedev.github.io/ostree/) to Ubuntu 20.04.
 
 The sources are taken from a Debian snapshot of sid.
 
