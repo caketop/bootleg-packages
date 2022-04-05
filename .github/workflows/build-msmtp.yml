@@ -1,0 +1,38 @@
+name: Build msmtp
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'msmtp/**'
+
+  pull_request:
+    paths:
+      - 'msmtp/**'
+
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish to Packagecloud?'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-packages.yml
+    with:
+      make: msmtp
+      platforms: linux/amd64,linux/arm64,linux/arm/v7
+    secrets:
+      BUILD_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+
+  publish:
+    if: (github.event_name == 'push') || (github.event.inputs.publish == 'true')
+    uses: ./.github/workflows/publish-packages.yml
+    needs: build
+    secrets:
+      BUILD_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
+      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}

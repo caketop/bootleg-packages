@@ -2,10 +2,6 @@ ARG PYTHON_RELEASE=3.10
 ARG PYTHON_PATCH=4
 ARG PYTHON_VERSION=${PYTHON_RELEASE}.${PYTHON_PATCH}
 ARG JEMALLOC_VERSION=5.2.1
-ARG PYGOBJECT_VERSION=3.42.0
-ARG PYTHON_APT_VERSION=2.3.0
-ARG LIBGUESTFS_RELEASE=1.48
-ARG LIBGUESTFS_VERSION=1.48.0
 
 FROM ubuntu:20.04 AS builder_base
 
@@ -124,7 +120,7 @@ RUN dpkg-buildpackage --build=binary -us -ui -uc
 
 ########################################################################
 
-FROM builder_base AS python_base
+FROM builder_base AS python_dev
 
 ARG PYTHON_RELEASE
 
@@ -133,132 +129,9 @@ COPY --from=python_build /home/builder/optpython-build/optpython*.deb /tmp
 RUN apt-get update && env DEBIAN_FRONTEND=noninteractive apt install -y /tmp/optpython*.deb
 ENV PATH=/opt/python-${PYTHON_RELEASE}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-FROM python_base AS pygobject_build
-
-ARG PYTHON_RELEASE PYGOBJECT_VERSION
-
-RUN apt-get update && apt-get build-dep -y pygobject
-
-USER builder
-
-RUN mkdir -p /home/builder/pygobject-build/optpython${PYTHON_RELEASE}-gi
-WORKDIR /home/builder/pygobject-build/optpython${PYTHON_RELEASE}-gi
-
-COPY --chown=builder optpython-gi/Makefile /home/builder/pygobject-build/optpython${PYTHON_RELEASE}-gi/Makefile
-COPY --chown=builder optpython-gi/debian/ /home/builder/pygobject-build/optpython${PYTHON_RELEASE}-gi/debian/
-
-RUN set -x && \
-    sed \
-      -e "s/@PYTHON_RELEASE@/${PYTHON_RELEASE}/" \
-      -e "s/@PYGOBJECT_VERSION@/${PYGOBJECT_VERSION}/" \
-      -i Makefile && \
-    sed "s/@PYTHON_RELEASE@/${PYTHON_RELEASE}/" -i debian/control && \
-    curl https://gitlab.gnome.org/GNOME/pygobject/-/blob/${PYGOBJECT_VERSION}/COPYING -o debian/copyright && \
-    env DEBFULLNAME=Caketop \
-        DEBEMAIL="packages@caketop.app" \
-        EDITOR=/bin/true \
-        dch --create \
-          --package "optpython${PYTHON_RELEASE}-gi" \
-          -v "${PYGOBJECT_VERSION}-$(date --iso-8601=seconds | sed 's/[^0-9]\+//g')+focal" \
-          --distribution focal "Converted from wheel"
-
-RUN dpkg-buildpackage --build=binary -us -ui -uc
-
 ########################################################################
 
-FROM python_base AS python_apt_build
+FROM scratch AS packages
 
-ARG PYTHON_RELEASE PYTHON_APT_VERSION
-
-RUN apt-get update && apt-get build-dep -y python-apt
-
-USER builder
-
-RUN mkdir -p /home/builder/python-apt-build/optpython${PYTHON_RELEASE}-apt
-WORKDIR /home/builder/python-apt-build/optpython${PYTHON_RELEASE}-apt
-
-COPY --chown=builder optpython-apt/Makefile /home/builder/python-apt-build/optpython${PYTHON_RELEASE}-apt/Makefile
-COPY --chown=builder optpython-apt/debian/ /home/builder/python-apt-build/optpython${PYTHON_RELEASE}-apt/debian/
-
-RUN set -x && \
-    sed \
-      -e "s/@PYTHON_RELEASE@/${PYTHON_RELEASE}/" \
-      -e "s/@PYTHON_APT_VERSION@/${PYTHON_APT_VERSION}/" \
-      -i Makefile && \
-    sed "s/@PYTHON_RELEASE@/${PYTHON_RELEASE}/" -i debian/control && \
-    curl https://salsa.debian.org/apt-team/python-apt/-/blob/${PYTHON_APT_VERSION}/COPYING.GPL -o debian/copyright && \
-    env DEBFULLNAME=Caketop \
-        DEBEMAIL="packages@caketop.app" \
-        EDITOR=/bin/true \
-        dch --create \
-          --package "optpython${PYTHON_RELEASE}-apt" \
-          -v "${PYTHON_APT_VERSION}-$(date --iso-8601=seconds | sed 's/[^0-9]\+//g')+focal" \
-          --distribution focal "Converted from wheel"
-
-RUN dpkg-buildpackage --build=binary -us -ui -uc
-
-########################################################################
-
-FROM python_base AS libguestfs_build
-
-ARG PYTHON_RELEASE LIBGUESTFS_RELEASE LIBGUESTFS_VERSION
-
-RUN set -x && \
-    apt-get update && \
-    apt-get build-dep -y libguestfs && \
-    apt-get install -y linux-image-virtual-hwe-20.04 zfsutils-linux && \
-    chmod 755 /boot/*
-
-USER builder
-
-RUN mkdir -p /home/builder/libguestfs-build
-WORKDIR /home/builder/libguestfs-build
-
-RUN curl https://download.libguestfs.org/${LIBGUESTFS_RELEASE}-stable/libguestfs-${LIBGUESTFS_VERSION}.tar.gz -o libguestfs-${LIBGUESTFS_VERSION}.tar.gz && \
-  tar -xzvf libguestfs-${LIBGUESTFS_VERSION}.tar.gz && \
-  rm -rf libguestfs-${LIBGUESTFS_VERSION}/debian
-
-COPY --chown=builder libguestfs-appliance-packagelist.diff /home/builder/libguestfs-build/
-COPY --chown=builder optpython-guestfs/debian/ /home/builder/libguestfs-build/libguestfs-${LIBGUESTFS_VERSION}/debian/
-
-WORKDIR /home/builder/libguestfs-build/libguestfs-${LIBGUESTFS_VERSION}
-
-RUN set -x && \
-    sed \
-      -e"s/@PYTHON_RELEASE@/${PYTHON_RELEASE}/" \
-      -e"s/@LIBGUESTFS_RELEASE@/${LIBGUESTFS_RELEASE}/" \
-      -i debian/control && \
-    sed \
-      -e "s/@PYTHON_RELEASE@/${PYTHON_RELEASE}/" \
-      -e "s#@MY_CFLAGS@#${MY_CFLAGS}#"  \
-      -e "s#@MY_LDFLAGS@#${MY_LDFLAGS}#"  \
-      -e "s#@MY_CPPFLAGS@#${MY_CPPFLAGS}#"  \
-      -i debian/rules && \
-    cp COPYING.LIB debian/copyright && \
-    patch -p0 < ../libguestfs-appliance-packagelist.diff && \
-    echo "/usr/bin/guestfish" > debian/guestfish${LIBGUESTFS_RELEASE}.install && \
-    echo "/opt/python-${PYTHON_RELEASE}/lib/*" > debian/optpython${PYTHON_RELEASE}-guestfs.install && \
-    echo "/usr/lib/libguestfs-fixed-appliance/*" > debian/libguestfs${LIBGUESTFS_RELEASE}-fixed-appliance.install && \
-    env DEBFULLNAME=Caketop \
-        DEBEMAIL="packages@caketop.app" \
-        EDITOR=/bin/true \
-        dch --create \
-          --package "optpython${PYTHON_RELEASE}-guestfs" \
-          -v "${LIBGUESTFS_VERSION}-$(date --iso-8601=seconds | sed 's/[^0-9]\+//g')+focal" \
-          --distribution focal "Built from source"
-
-RUN DEB_BUILD_OPTIONS="nocheck nodoc" dpkg-buildpackage --build=binary -us -ui -uc
-
-########################################################################
-
-FROM scratch AS artifacts
-
-COPY --from=python_build /home/builder/optpython-build/optpython*.deb /
-COPY --from=python_build /home/builder/optpython-build/optpython*.ddeb /
-COPY --from=python_apt_build /home/builder/python-apt-build/*.deb /
-COPY --from=python_apt_build /home/builder/python-apt-build/*.ddeb /
-COPY --from=pygobject_build /home/builder/pygobject-build/*.deb /
-COPY --from=pygobject_build /home/builder/pygobject-build/*.ddeb /
-COPY --from=libguestfs_build /home/builder/libguestfs-build/*.deb /
-COPY --from=libguestfs_build /home/builder/libguestfs-build/*.ddeb /
-COPY --from=libguestfs_build /home/builder/libguestfs-build/libguestfs-*/debian/tmp/usr/lib/libguestfs-fixed-appliance/appliance-*.tar.xz /
+COPY --from=python_build /home/builder/optpython-build/*.deb /
+COPY --from=python_build /home/builder/optpython-build/*.ddeb /

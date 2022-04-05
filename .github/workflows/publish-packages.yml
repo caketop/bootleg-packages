@@ -4,6 +4,8 @@ on:
     secrets:
       BUILD_WEBHOOK_URL:
         required: true
+      PACKAGECLOUD_TOKEN:
+        required: true
 
 jobs:
   publish:
@@ -16,14 +18,21 @@ jobs:
       - name: Install Packagecloud CLI
         run: sudo gem install package_cloud
 
-      - run: ls -laR artifacts
+      - run: find artifacts \( -name '*.deb' -o -name '*.ddeb' -o -name '*.dsc' \) -print
 
       - name: Upload packages
         run: |
-          find artifacts -name '*.deb' -o -name '*.ddeb' -o -name '*.dsc' -print0 | while IFS= read -r -d '' package ; do
-            echo "PACKAGE: $package"
+          set -x
+
+          while IFS= read -r -d '' package ; do
+            if [[ $package == *.ddeb ]]; then
+              deb=$(basename $package .ddeb).deb
+              mv "$package" "$deb"
+              package=$deb
+            fi
+
             package_cloud push caketop/bootleg-packages/ubuntu/focal "$package" || true
-          done
+          done < <(find artifacts \( -name '*.deb' -o -name '*.ddeb' -o -name '*.dsc' \) -print0)
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
 

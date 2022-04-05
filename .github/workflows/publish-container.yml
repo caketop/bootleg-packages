@@ -1,12 +1,19 @@
-name: Build packages
+name: Publish container
 on:
   workflow_call:
     inputs:
-      make:
+      path:
         required: true
         type: string
       platforms:
+        required: false
+        type: string
+        default: linux/amd64
+      container_name:
         required: true
+        type: string
+      container_tag:
+        required: false
         type: string
       buildx_args:
         required: false
@@ -20,7 +27,7 @@ on:
         required: true
 
 jobs:
-  build:
+  container:
     runs-on: ubuntu-20.04
     steps:
       - uses: act10ns/slack@v1.5.1
@@ -49,15 +56,25 @@ jobs:
       - name: Expose GitHub runtime for caching
         uses: crazy-max/ghaction-github-runtime@v1
 
-      - name: make
+      - name: buildx
         env:
-          BUILDX_ARGS: ${{ inputs.buildx_args }} --platform ${{ inputs.platforms }} --cache-from type=gha --cache-to type=gha,mode=max
-        run: make ${{ inputs.make }}
+          INPUT_CONTAINER_TAG: ${{ inputs.container_tag || github.event.pull_request.head.ref }}
+        run: |
+          set -x
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: packages
-          path: output/${{ inputs.make }}/*
+          CONTAINER_TAG=${INPUT_CONTAINER_TAG:-${GITHUB_REF#refs/heads/}}
+
+          if [ "$CONTAINER_TAG" == "main" ]; then
+            CONTAINER_TAG=latest
+          else
+            CONTAINER_TAG=$(echo "$CONTAINER_TAG" | sed 's/[^a-zA-Z0-9]\+/-/')
+          fi
+
+          docker buildx build ${{ inputs.buildx_args }} \
+            --platform ${{ inputs.platforms }} \
+            --cache-from type=gha \
+            -t "${{ inputs.container_name }}:$CONTAINER_TAG" --push \
+            ${{ inputs.path }}
 
       - uses: act10ns/slack@v1.5.1
         with:
