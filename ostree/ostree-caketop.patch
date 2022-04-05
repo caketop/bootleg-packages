@@ -1,33 +1,21 @@
-diff -dpru ostree-2022.1.orig/debian/changelog ostree-2022.1/debian/changelog
---- ostree-2022.1.orig/debian/changelog	2022-01-24 04:43:09.000000000 -0600
-+++ ostree-2022.1/debian/changelog	2022-02-24 16:37:17.051906652 -0600
-@@ -1,3 +1,9 @@
-+ostree (2022.1-3+caketop.focal) focal; urgency=medium
-+
-+  * Switch to builtin grub2-mkconfig
-+
-+ -- Caketop <packages@caketop.app>  Thu, 24 Feb 2022 16:05:41 -0600
-+
- ostree (2022.1-3) unstable; urgency=medium
- 
-   * Use debhelper 11 features instead of dh-exec
-diff -dpru ostree-2022.1.orig/debian/ostree-boot.install ostree-2022.1/debian/ostree-boot.install
---- ostree-2022.1.orig/debian/ostree-boot.install	2022-01-24 04:43:09.000000000 -0600
-+++ ostree-2022.1/debian/ostree-boot.install	2022-02-24 16:37:04.051581475 -0600
+diff -dpru ostree-2022.2.orig/debian/ostree-boot.install ostree-2022.2/debian/ostree-boot.install
+--- ostree-2022.2.orig/debian/ostree-boot.install	2022-03-08 16:16:43.000000000 +0000
++++ ostree-2022.2/debian/ostree-boot.install	2022-04-05 01:47:25.849322982 +0000
 @@ -1,5 +1,4 @@
  etc/dracut.conf.d/ostree.conf
 -etc/grub.d/15_ostree
  lib/systemd/system-generators/ostree-system-generator
  lib/systemd/system/ostree-finalize-staged.path
  lib/systemd/system/ostree-finalize-staged.service
-@@ -9,4 +8,3 @@ usr/lib/dracut/modules.d/98ostree
+@@ -9,5 +8,4 @@ usr/lib/dracut/modules.d/98ostree
  usr/lib/ostree/ostree-prepare-root
  usr/lib/ostree/ostree-remount
  usr/lib/tmpfiles.d/ostree-tmpfiles.conf
 -usr/libexec/libostree/grub2-15_ostree
-diff -dpru ostree-2022.1.orig/debian/ostree.install ostree-2022.1/debian/ostree.install
---- ostree-2022.1.orig/debian/ostree.install	2022-01-24 04:43:09.000000000 -0600
-+++ ostree-2022.1/debian/ostree.install	2022-02-24 16:37:04.051581475 -0600
+ usr/libexec/libostree/s390x-se-luks-gencpio
+diff -dpru ostree-2022.2.orig/debian/ostree.install ostree-2022.2/debian/ostree.install
+--- ostree-2022.2.orig/debian/ostree.install	2022-03-08 16:16:43.000000000 +0000
++++ ostree-2022.2/debian/ostree.install	2022-04-05 01:47:44.137781447 +0000
 @@ -1,5 +1,6 @@
  etc/ostree
  usr/bin/ostree
@@ -35,17 +23,16 @@ diff -dpru ostree-2022.1.orig/debian/ostree.install ostree-2022.1/debian/ostree.
 +usr/lib/ostree/ostree-grub-generator
  usr/share/bash-completion/completions/ostree
  usr/share/ostree/trusted.gpg.d
-diff -dpru ostree-2022.1.orig/debian/rules ostree-2022.1/debian/rules
---- ostree-2022.1.orig/debian/rules	2022-01-24 04:43:09.000000000 -0600
-+++ ostree-2022.1/debian/rules	2022-02-24 16:37:04.051581475 -0600
-@@ -13,13 +13,11 @@ override_dh_autoreconf:
- configure_options = \
+diff -dpru ostree-2022.2.orig/debian/rules ostree-2022.2/debian/rules
+--- ostree-2022.2.orig/debian/rules	2022-03-08 16:16:43.000000000 +0000
++++ ostree-2022.2/debian/rules	2022-04-05 01:48:21.366714735 +0000
+@@ -14,12 +14,10 @@ configure_options = \
  	--enable-installed-tests \
  	--with-avahi \
-+	--with-builtin-grub2-mkconfig \
  	--with-dracut \
 -	--with-grub2 \
 -	--with-grub2-mkconfig-path=/usr/sbin/grub-mkconfig \
++	--with-builtin-grub2-mkconfig \
  	--with-libarchive \
  	--with-libsystemd \
  	--with-libmount \
