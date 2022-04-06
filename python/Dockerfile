@@ -16,7 +16,7 @@ RUN set -x && \
   add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
   apt-get install -y gcc-11 g++-11 cpp-11
 
-RUN groupadd -g 1000 builder && useradd -m -u 1000 -g builder builder
+RUN groupadd -g 1000 builder && useradd -m -u 1000 -g builder -s /bin/bash builder
 
 ENV MY_CFLAGS="-ffile-prefix-map=/=. -fstack-protector-strong -Wformat -Werror=format-security" \
     MY_LDFLAGS="-Wl,-z,relro" \
