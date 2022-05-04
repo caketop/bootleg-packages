@@ -1,0 +1,12 @@
+Source: ostree-ext-cli
+Section: unknown
+Priority: optional
+Maintainer: Caketop <packages@caketop.app>
+Build-Depends: debhelper (>=11~)
+Standards-Version: 4.1.4
+
+Package: ostree-ext-cli
+Architecture: any
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Extended ostree tools
