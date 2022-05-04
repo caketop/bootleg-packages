@@ -23,7 +23,7 @@ jobs:
     uses: ./.github/workflows/build-packages.yml
     with:
       make: ostree-ext-cli
-      platforms: linux/amd64,linux/arm64,linux/arm/v7
+      platforms: linux/amd64,linux/arm64
     secrets:
       BUILD_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
       REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
