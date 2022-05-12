@@ -54,7 +54,7 @@ jobs:
           BUILDX_ARGS: ${{ inputs.buildx_args }} --platform ${{ inputs.platforms }} --cache-from type=gha --cache-to type=gha,mode=max
         run: make ${{ inputs.make }}
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: packages
           path: output/${{ inputs.make }}/*
