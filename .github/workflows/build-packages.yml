@@ -43,7 +43,7 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_TOKEN }}
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Needed for buildx gha cache to work
       - name: Expose GitHub runtime for caching
