@@ -1,0 +1,24 @@
+From 9c233a5908374ae074df52de337a757b86a72628 Mon Sep 17 00:00:00 2001
+From: Jordan Webb <jordan@getseam.com>
+Date: Wed, 9 Dec 2020 14:07:33 -0600
+Subject: [PATCH] Skip generating header in grub.cfg
+
+---
+ src/boot/grub2/ostree-grub-generator | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/boot/grub2/ostree-grub-generator b/src/boot/grub2/ostree-grub-generator
+index d1436b65..09926dd7 100644
+--- a/src/boot/grub2/ostree-grub-generator
++++ b/src/boot/grub2/ostree-grub-generator
+@@ -108,7 +108,7 @@ EOF
+ generate_grub2_cfg()
+ {
+     populate_warning
+-    populate_header
++    #populate_header
+     populate_menu
+ }
+
+--
+2.24.3 (Apple Git-128)
