@@ -25,12 +25,15 @@ RUN dget -u http://snapshot.debian.org/archive/debian/20220404T205647Z/pool/main
       -t "apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends -y -t focal-backports" \
       ostree-2022.2/debian/control
 
-COPY ostree-caketop.patch /usr/src/ostree-caketop.patch
+COPY *.patch /usr/src/
 
 RUN rm *.debian.tar.* *.dsc *.deb
 
 WORKDIR /usr/src/ostree-2022.2
 RUN patch -p1 < ../ostree-caketop.patch && rm ../ostree-caketop.patch
+RUN patch -p1 < ../no-grub-cfg-header.patch && rm ../no-grub-cfg-header.patch
+
+RUN EDITOR=/bin/true DEBFULLNAME=Caketop DEBEMAIL="packages@caketop.app" dpkg-source --commit . no-grub-cfg-header
 RUN DEBFULLNAME=Caketop DEBEMAIL="packages@caketop.app" dch --distribution focal --local .$(date --iso-8601=seconds | sed 's/[^0-9]\+//g') "Automatic build"
 RUN DEB_BUILD_OPTIONS="nocheck nodoc" dpkg-buildpackage
 
