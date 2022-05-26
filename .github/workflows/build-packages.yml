@@ -47,7 +47,7 @@ jobs:
 
       # Needed for buildx gha cache to work
       - name: Expose GitHub runtime for caching
-        uses: crazy-max/ghaction-github-runtime@v1
+        uses: crazy-max/ghaction-github-runtime@v2
 
       - name: make
         env:
