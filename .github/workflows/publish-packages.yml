@@ -36,7 +36,7 @@ jobs:
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
 
-      - uses: act10ns/slack@v1.5.1
+      - uses: act10ns/slack@v2.0.0
         with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
