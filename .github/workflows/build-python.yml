@@ -41,8 +41,6 @@ jobs:
   publish:
     if: (github.event_name == 'push') || (github.event.inputs.publish == 'true')
     uses: ./.github/workflows/publish-packages.yml
-    with:
-      platforms: linux/amd64,linux/arm64
     needs: build
     secrets:
       BUILD_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
@@ -57,6 +55,7 @@ jobs:
       container_name: caketop/python-build
       container_tag: ${{ github.event.inputs.container_tag }}
       buildx_args: --target python_dev
+      platforms: linux/amd64,linux/arm64
     secrets:
       BUILD_WEBHOOK_URL: ${{ secrets.BUILDS_WEBHOOK_URL }}
       REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
